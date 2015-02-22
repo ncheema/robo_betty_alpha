@@ -13,11 +13,13 @@ var errorHandler = require('errorhandler');
 var path = require('path');
 var mongoose = require('mongoose');
 
+var passport = require('passport');
+
 /*
  * MongoDb configuration.
  */
-var config = require('./config/config');
-
+var config = require('./server/config/database.js');
+ configuration
 /*
  * Create Express server.
  */
@@ -26,7 +28,7 @@ var app = express();
 /*
  * Connect to MongoDB.
  */
-mongoose.connect(config.mongoDBUrl);
+mongoose.connect(config.url);
 mongoose.connection.on('connected', function() {
   console.log('MongoDB connected succesfully at: ' + config.mongoDBUrl);
 });
@@ -34,6 +36,9 @@ mongoose.connection.on('connected', function() {
 mongoose.connection.on('error', function() {
   console.error('MongoDB Connection Error. Please make sure that MongoDB is running.');
 });
+
+require('./server/config/passport')(passport); // pass passport for configuration
+
 
 /*
  * Express configuration.
@@ -44,6 +49,22 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../dist')));
+
+
+/*
+*
+* required for passport
+*/
+app.use(session({ secret: 'roboBettyAdmin' })); // session secret
+app.use(passport.initialize());
+app.use(passport.session()); // persistent login sessions
+app.use(flash()); // use connect-flash for flash messages stored in session
+
+// routes ======================================================================
+require('./server/routes/auth.js')(app, passport); // load our routes and pass in our app and fully configured passport
+//so auth can use the passport 
+
+
 
 
 /*
