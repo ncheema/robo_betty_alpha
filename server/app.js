@@ -71,12 +71,9 @@ require('../server/routes/auth.js')(app, passport); // load our routes and pass 
  * Add in our routes
  */
 var home = require('./routes/home');
-var user = require('./routes/user');
-var product = require('./routes/product');
 
 app.use(home);
-app.use('/api', user);
-app.use('/api', product);
+
 
 /*
  * Error Handler.
